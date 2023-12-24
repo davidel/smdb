@@ -1,0 +1,65 @@
+<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=windows-1252">
+  <meta name="Author" content="Davide Libenzi">
+  <meta name="Description"
+ content="SMDB Library Home Page">
+  <meta name="GENERATOR" content="Emacs">
+  <meta name="Keywords"
+ content="database,simple,transaction,GDBM,portable,fast">
+  <meta name="ProgId" content="FrontPage.Editor.Document">
+  <title>SMDB Library Home Page</title>
+</head>
+<body
+ style="color: rgb(0, 0, 255); background-color: rgb(255, 255, 255);font-family: monospace;">
+<p align="center"><font size="+1"><b>SMDB Library<br>
+</b>by<br>
+<a href="http://www.xmailserver.org/davide.html">Davide Libenzi</a></font></p>
+<p align="left"><br>
+
+The
+<B>SMDB</B>
+
+library exports a database API somehow similar to the one supplied by the GNU GDBM
+library, with a few differences.
+The
+<B>SMDB</B>
+
+database library is totally system independent, via the use of externally supplied
+interface pointers.
+The
+<B>SMDB</B>
+
+databse library does not try to implement any file locking, which is left to the caller,
+if the particular use requires it.
+This allows single instance users to not pay the the price (in terms of performance and portability)
+of the locking framework.
+The
+<B>SMDB</B>
+
+database library supports transactions, multiple tables inside the same DB file, and is less than half
+the size of GDBM.
+Finally, the
+<B>SMDB</B>
+
+database library is available under the loser LGPL license, instead of the GPL one.
+Conceptually though, both allows for simple storage and retrieval of KEY+DATA couples,
+inside a table.
+</p>
+<p align="center"><br>
+<b><font size="+1">Documentation</font></b></p>
+<p align="left">SMDB man page: <a href="smdb.html">HTML</a> <a
+ href="smdb.txt">TXT</a> <a href="smdb.ps">PS</a><br>
+<br>
+</p>
+<p align="center"><font size="+1"><b>Download</b></font></p>
+<p align="left">Latest version : <a href="smdb-0.4.tar.gz">0.4</a></p>
+<p align="left"> </p>
+<p align="center"><font size="+1"><b>Links</b></font></p>
+<p align="left"><a href="http://freshmeat.net/projects/smdb/">FreshMeat
+Home Page</a><br>
+<p align="left"> </p>
+</body>
+</html>

@@ -1,0 +1,1698 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML><HEAD><TITLE>Man page of SMDB</TITLE>
+</HEAD><BODY text="#0000FF" bgcolor="#FFFFFF" style="font-family: monospace;">
+<H1>SMDB</H1>
+Section: SMDB - Simple/Small DB Library (3)<BR>Updated: 0.4<BR><A HREF="#index">Index</A>
+<A HREF="/cgi-bin/man/man2html">Return to Main Contents</A><HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<P>
+smdb_dbf_create, smdb_dbf_open, smdb_dbf_free, smdb_dbf_create_table,
+smdb_dbf_free_table, smdb_dbf_sync, smdb_dbf_begin, smdb_dbf_end,
+smdb_dbf_rollback, smdb_dbf_get, smdb_dbf_get_next, smdb_dbf_first,
+smdb_dbf_next, smdb_dbf_free_record, smdb_dbf_put, smdb_dbf_erase
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<PRE>
+<B>#include &lt;<A HREF="file:///usr/include/smdb-incl.h">smdb-incl.h</A>&gt;</B>
+
+<B>int </B><I>smdb_dbf_create</I><B>(struct smdbxi_factory *</B><I>fac</I><B>, struct smdbxi_file *</B><I>bfile</I><B>,struct smdb_db_config const *</B><I>dbcfg</I><B>, struct smdb_dbfile_ctx **</B><I>pdfctx</I><B>);</B>
+<B>int </B><I>smdb_dbf_open</I><B>(struct smdbxi_factory *</B><I>fac</I><B>, struct smdbxi_file *</B><I>bfile</I><B>, struct smdb_db_config const *</B><I>dbcfg</I><B>, struct smdb_dbfile_ctx **</B><I>pdfctx</I><B>);</B>
+<B>void </B><I>smdb_dbf_free</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+<B>int </B><I>smdb_dbf_create_table</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, unsigned int</B><I>tblsize</I><B>);</B>
+<B>int </B><I>smdb_dbf_free_table</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>);</B>
+<B>int </B><I>smdb_dbf_sync</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+<B>int </B><I>smdb_dbf_begin</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+<B>int </B><I>smdb_dbf_end</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+<B>int </B><I>smdb_dbf_rollback</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+<B>int </B><I>smdb_dbf_get</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, struct smdb_db_ckey const *</B><I>key</I><B>, struct smdb_db_record *</B><I>rec</I><B>,struct smdb_db_kenum *</B><I>ken</I><B>);</B>
+<B>int </B><I>smdb_dbf_get_next</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, struct smdb_db_ckey const *</B><I>key</I><B>, struct smdb_db_record *</B><I>rec</I><B>, struct smdb_db_kenum *</B><I>ken</I><B>);</B>
+<B>int </B><I>smdb_dbf_first</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, struct smdb_db_record *</B><I>rec</I><B>, struct smdb_db_kenum *</B><I>ken</I><B>);</B>
+<B>int </B><I>smdb_dbf_next</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, struct smdb_db_record *</B><I>rec</I><B>, struct smdb_db_kenum *</B><I>ken</I><B>);</B>
+<B>void </B><I>smdb_dbf_free_record</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, struct smdb_db_record *</B><I>rec</I><B>);</B>
+<B>int </B><I>smdb_dbf_put</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, struct smdb_db_ckey const *</B><I>key</I><B>, struct smdb_db_cdata *</B><I>data</I><B>);</B>
+<B>int </B><I>smdb_dbf_erase</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, struct smdb_db_ckey const *</B><I>key</I><B>, struct smdb_db_cdata const *</B><I>data</I><B>);</B>
+
+</PRE><A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+The
+<B>SMDB</B>
+
+library exports a database API somehow similar to the one supplied by the GNU GDBM
+library, with a few differences.
+The
+<B>SMDB</B>
+
+database library is totally system independent, via the use of externally supplied
+interface pointers.
+The
+<B>SMDB</B>
+
+databse library does not try to implement any file locking, which is left to the caller,
+if the particular use requires it.
+This allows single instance users to not pay the the price (in terms of performance and portability)
+of the locking framework.
+The
+<B>SMDB</B>
+
+database library supports transactions, multiple tables inside the same DB file, and is less than half
+the size of GDBM.
+Finally, the
+<B>SMDB</B>
+
+database library is available under the loser LGPL license, instead of the GPL one.
+Conceptually though, both allows for simple storage and retrieval of KEY+DATA couples,
+inside a table.
+<P>
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H3>Structures And Macros</H3>
+
+The
+<B>SMDB</B>
+
+library uses externally supplied interfaces for every task that is related
+with the host system interaction. This allows for a totally portable implementation,
+that was one of the major objectives of its development. An interface is
+composed by an opaque data pointer
+<I>priv</I>
+
+and a set of methods (functions pointers) exported by the interface. All the interfaces
+exports the two basic methods
+<I>get</I>
+
+and
+<I>release</I>.
+
+The
+<I>get</I>
+
+method acquires an interface and makes sure it remains valid during the whole
+time it is used. Once an instance of an interface is no more used, the
+<I>release</I>
+
+method should be called. Two macros are available for this purpose:
+<DL COMPACT>
+<DT><B>SMDBXI_GET(</B><I>iface</I><B>)</B>
+
+<DD>
+Get an instance of the interface pointed by
+<I>iface</I>.
+
+<P>
+<DT><B>SMDBXI_RELEASE(</B><I>iface</I><B>)</B>
+
+<DD>
+Release an instance of the interface pointed by
+<I>iface</I>.
+
+An example implementation of the interfaces required by
+<B>SMDB</B>
+
+is supplied next in this document, and is also available inside the
+<B>SMDB</B>
+
+distribution package.
+<P>
+</DL>
+<P>
+
+All the memory management used by the
+<B>SMDB</B>
+
+library is defined by the
+<B>struct smdbxi_mem</B>
+
+interface:
+<DL COMPACT>
+<DT><B>struct smdbxi_mem</B>
+
+<DD>
+<P>
+<PRE>
+struct smdbxi_mem
+{
+        void *priv;
+        int (*get) (void *priv);
+        int (*release) (void *priv);
+        void *(*alloc) (void *priv, int size);
+        void (*free) (void *priv, void *ptr);
+};
+</PRE>
+
+<P>
+The
+<I>alloc</I>
+
+method allows the caller to allocate a block of memory, whereas the method
+<I>free</I>
+
+allows the caller to free a block of memory returned by
+<I>alloc</I>.
+
+The following macros are available to access the
+<B>struct smdbxi_mem</B>
+
+methods:
+<DT><B>SMDBXI_MM_ALLOC(</B><I>iface</I><B>, </B><I>size</I><B>)</B>
+
+<DD>
+Allocates a memory block of
+<I>size</I>
+
+bytes using the
+<I>iface</I>
+
+memory interface. The macro returns a pointer to the newly allocated
+memory block, or
+<B>NULL</B>
+
+in case of failure.
+<DT><B>SMDBXI_MM_FREE(</B><I>iface</I><B>, </B><I>ptr</I><B>)</B>
+
+<DD>
+Frees a memory block pointed by
+<I>ptr</I>
+
+using the
+<I>iface</I>
+
+memory interface. It is allowed to call the
+<B>SMDBXI_MM_FREE</B>
+
+macro by passing
+<B>NULL</B>
+
+as
+<I>ptr</I>
+
+parameter.
+</DL>
+<P>
+
+<P>
+The abstraction of a file is based on the
+<B>struct smdbxi_file</B>
+
+interface:
+<DL COMPACT>
+<DT><B>struct smdbxi_file</B>
+
+<DD>
+<P>
+<PRE>
+struct smdbxi_file
+{
+        void *priv;
+        int (*get)(void *);
+        int (*release)(void *);
+        smdb_offset_t (*seek)(void *, smdb_offset_t, int);
+        int (*read)(void *, void *, int);
+        int (*write)(void *, void const *, int);
+        int (*truncate)(void *, smdb_offset_t);
+        int (*sync)(void *);
+        char const *(*path)(void *);
+};
+</PRE>
+
+<P>
+Besides from the common
+<I>get</I>
+
+and
+<I>release</I>
+
+methods, the
+<B>struct smdbxi_file</B>
+
+interface defines functions to access the file API.
+Macros are availble to access the
+<B>struct smdbxi_file</B>
+
+interface:
+<DT><B>SMDBXI_FL_SEEK(</B><I>iface</I><B>, </B><I>offset</I><B>, </B><I>whence</I><B>)</B>
+
+<DD>
+Set the file position at
+<I>offset</I>
+
+bytes from the
+<I>whence</I>
+
+location. Valid constants for the
+<I>whence</I>
+
+location are:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><B>SMDBXI_FL_SEEKSET</B>
+
+<DD>
+The
+<I>offset</I>
+
+is relative to the beginning of the file.
+<DT><B>SMDBXI_FL_SEEKCUR</B>
+
+<DD>
+The
+<I>offset</I>
+
+is relative to the current file position.
+<DT><B>SMDBXI_FL_SEEKEND</B>
+
+<DD>
+The
+<I>offset</I>
+
+is relative to the end of the file.
+</DL>
+</DL>
+
+<P>
+<DL COMPACT><DT><DD>
+The
+<B>SMDBXI_FL_SEEK</B>
+
+returns the current file position from the beginning of the file,
+or -1 in case of error.
+</DL>
+
+<DT><B>SMDBXI_FL_READ(</B><I>iface</I><B>, </B><I>buffer</I><B>, </B><I>size</I><B>)</B>
+
+<DD>
+Read
+<I>size</I>
+
+bytes into the buffer pointer by
+<I>buffer</I>
+
+using the
+<I>iface</I>
+
+file interface. The function returns the number of bytes read, that
+can be lower than the requested one in case of EOF, or -1 in case
+of error.
+<DT><B>SMDBXI_FL_WRITE(</B><I>iface</I><B>, </B><I>buffer</I><B>, </B><I>size</I><B>)</B>
+
+<DD>
+Write
+<I>size</I>
+
+bytes from the buffer pointer by
+<I>buffer</I>
+
+using the
+<I>iface</I>
+
+file interface. The function returns the number of bytes written, or -1 in case
+of error.
+<DT><B>SMDBXI_FL_TRUNCATE(</B><I>iface</I><B>, </B><I>length</I><B>)</B>
+
+<DD>
+Truncate the file identified by the
+<I>iface</I>
+
+interface to
+<I>length</I>
+
+bytes. The new length can be lower of higher than the current file size.
+The function returns 0 if succeeded, or -1 in case of error.
+<DT><B>SMDBXI_FL_SYNC(</B><I>iface</I><B>)</B>
+
+<DD>
+Sync the buffers content of the file identified by the
+<I>iface</I>
+
+interface to the underlying storage media.
+The function returns 0 if succeeded, or -1 in case of error.
+<DT><B>SMDBXI_FL_PATH(</B><I>iface</I><B>)</B>
+
+<DD>
+Returns the path of the file identified by the
+<I>iface</I>
+
+interface.
+<P>
+</DL>
+<P>
+
+The
+<B>struct smdbxi_fs</B>
+
+interface provide access to some basic file system operations.
+<BR>
+
+<DL COMPACT>
+<DT><B>struct smdbxi_fs</B>
+
+<DD>
+<P>
+<PRE>
+struct smdbxi_fs {
+        void *priv;
+        int (*get)(void *);
+        int (*release)(void *);
+        struct smdbxi_file *(*open)(void *, char const *, int);
+        int (*remove)(void *, char const *);
+        int (*rename)(void *, char const *, char const *);
+        int (*mkdir)(void *, char const *);
+        int (*rmdir)(void *, char const *);
+};
+</PRE>
+
+<P>
+The following macros are availble to access the
+<B>struct smdbxi_file</B>
+
+interface (on top of the usual get/release):
+<DT><B>SMDBXI_FS_OPEN(</B><I>iface</I><B>, </B><I>path</I><B>, </B><I>mode</I><B>)</B>
+
+<DD>
+Opens the file specified in
+<I>path</I>
+
+using the
+<I>mode</I>
+
+parameter to request diffrent type of access.
+Valid values for the
+<I>mode</I>
+
+parameter are:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><B>SMDBXI_FL_ROPEN</B>
+
+<DD>
+Opens an existing file in read-only mode.
+<DT><B>SMDBXI_FL_RWOPEN</B>
+
+<DD>
+Opens an existing file in read-write mode.
+<DT><B>SMDBXI_FL_CREATE</B>
+
+<DD>
+Tries to open an existing file in read-write mode, and creates it if the
+file specified by
+<I>path</I>
+
+does not exist.
+<DT><B>SMDBXI_FL_CREATENEW</B>
+
+<DD>
+Tries to open an existing file in read-write mode and truncates it if exists.
+If the file specified by
+<I>path</I>
+
+does not exist, the underlying callback function creates it.
+</DL>
+</DL>
+
+<P>
+<DL COMPACT><DT><DD>
+The
+<B>SMDBXI_FL_OPEN</B>
+
+returns the new file interface that can be used to manipulate the newly
+open file, or
+<B>NULL</B>
+
+in case of error.
+</DL>
+
+<DT><B>SMDBXI_FS_REMOVE(</B><I>iface</I><B>, </B><I>path</I><B>)</B>
+
+<DD>
+Removes the file specified by the
+<I>path</I>
+
+parameter.
+Returns 0 in case of success, or -1 in case of error.
+<DT><B>SMDBXI_FS_RENAME(</B><I>iface</I><B>, </B><I>opath</I><B>, </B><I>npath</I><B>)</B>
+
+<DD>
+Renames the file/directory specified by the
+<I>opath</I>
+
+parameter, into the path
+specified in the
+<I>npath</I>
+
+parameter.
+Returns 0 in case of success, or -1 in case of error.
+<DT><B>SMDBXI_FS_MKDIR(</B><I>iface</I><B>, </B><I>path</I><B>)</B>
+
+<DD>
+Creates the directory specified by the
+<I>path</I>
+
+parameter.
+Returns 0 in case of success, or -1 in case of error.
+<DT><B>SMDBXI_FS_RMDIR(</B><I>iface</I><B>, </B><I>path</I><B>)</B>
+
+<DD>
+Removes the directory specified by the
+<I>path</I>
+
+parameter.
+Returns 0 in case of success, or -1 in case of error.
+<P>
+</DL>
+<P>
+
+The
+<B>struct smdbxi_factory</B>
+
+interface is the factory of all the other interfaces:
+<BR>
+
+<DL COMPACT>
+<DT><B>struct smdbxi_factory</B>
+
+<DD>
+<P>
+<PRE>
+struct smdbxi_factory {
+        void *priv;
+        int (*get)(void *);
+        int (*release)(void *);
+        struct smdbxi_mem *(*mem)(void *);
+        struct smdbxi_file *(*file)(void *);
+        struct smdbxi_fs *(*fs)(void *);
+};
+</PRE>
+
+<P>
+Besides from the usual
+<I>get</I>
+
+and
+<I>release</I>
+
+methods, other function are available to instantiate other interfaces.
+The
+<I>mem</I>
+
+method allows the creation of a memory interface, whereas the
+<I>file</I>
+
+method creates a file interface. Macros are defined to access the
+<B>struct smdbxi_factory</B>
+
+functions:
+<DT><B>SMDBXI_FC_MEM(</B><I>iface</I><B>)</B>
+
+<DD>
+Returns a pointer to a memory interface (
+<B>struct smdbxi_mem</B>
+
+), or
+<B>NULL</B>
+
+in case of error.
+<DT><B>SMDBXI_FC_FILE(</B><I>iface</I><B>)</B>
+
+<DD>
+Returns a pointer to a file interface (
+<B>struct smdbxi_file</B>
+
+), or
+<B>NULL</B>
+
+in case of error.
+The file will be a temporary empty file, which will be removed once closed.
+<DT><B>SMDBXI_FC_FS(</B><I>iface</I><B>)</B>
+
+<DD>
+Returns a pointer to a file system interface (
+<B>struct smdbxi_fs</B>
+
+), or
+<B>NULL</B>
+
+in case of error.
+</DL>
+<P>
+
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H3>Functions</H3>
+
+<P>
+<DL COMPACT>
+<DT><B>int </B><I>smdb_dbf_create</I><B>(struct smdbxi_factory *</B><I>fac</I><B>, struct smdbxi_file *</B><I>bfile</I><B>,struct smdb_db_config const *</B><I>dbcfg</I><B>, struct smdb_dbfile_ctx **</B><I>pdfctx</I><B>);</B>
+
+<DD>
+<P>
+Creates a new database file, using the file interface supplied in
+<I>bfile</I>
+
+as storage.
+The
+<I>fac</I>
+
+parameter represent the interface factory, while the parameter
+<I>dbcfg</I>
+
+is used to configure the database creation.
+The
+<I>dbcfg</I>
+
+is a pointer to the following structure:
+<P>
+<PRE>
+struct smdb_db_config {
+        smdb_u32 blk_size;
+        smdb_u32 blk_count;
+        smdb_u32 cache_size;
+        smdb_u32 num_tables;
+};
+</PRE>
+
+<P>
+The
+<B>blk_size</B>
+
+member is the requested block size, which cannot be smaller than 256 bytes.
+The
+<B>blk_count</B>
+
+is the initial allocation for the database.
+The database file will automatically grow, but if you know beforehand what you estimated
+final size will be, guessing the
+<B>blk_count</B>
+
+parameter can reduce the number of database file grow operations.
+The
+<B>cache_size</B>
+
+is the amount of RAM (in bytes) to be used for caching the database file blocks.
+It will be rounded to the next block size.
+The
+<B>num_tables</B>
+
+parameter sets the allocation for the maximum number of tables which will be possible
+to create inside the database.
+If the
+<I>dbcfg</I>
+
+parameter is
+<B>NULL</B>,
+
+default values will be chosen.
+The
+<I>pdfctx</I>
+
+parameter is a pointer to the database accessory structure returned in case of success.
+The function returns 0 in case of success, and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_open</I><B>(struct smdbxi_factory *</B><I>fac</I><B>, struct smdbxi_file *</B><I>bfile</I><B>, struct smdb_db_config const *</B><I>dbcfg</I><B>, struct smdb_dbfile_ctx **</B><I>pdfctx</I><B>);</B>
+
+<DD>
+<P>
+Opens an existing database file, using the file interface supplied in
+<I>bfile</I>
+
+as storage.
+The
+<I>fac</I>
+
+parameter represent the interface factory, while the parameter
+<I>dbcfg</I>
+
+is used to configure the database internals.
+The only parameter used during the open operation, is the
+<B>cache_size</B>
+
+one.
+The
+<I>pdfctx</I>
+
+parameter is a pointer to the database accessory structure returned in case of success.
+The function returns 0 in case of success, and -1 in case of error.
+<P>
+<DT><B>void </B><I>smdb_dbf_free</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+
+<DD>
+<P>
+Frees the database object pointed by the
+<I>dfctx</I>
+
+parameter, and releases all the associated resources.
+<P>
+<DT><B>int </B><I>smdb_dbf_create_table</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, unsigned int</B><I>tblsize</I><B>);</B>
+
+<DD>
+<P>
+Creates a table with ID
+<I>tblid</I>
+
+inside the database pointed by
+<I>dfctx</I>,
+
+with an initial hash allocation close to the value specified in the
+<I>tblsize</I>
+
+parameter.
+The
+<I>tblid</I>
+
+value must be lower than the number of tables allocated inside the
+database file during its creation.
+The function returns 0 in case of success, and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_free_table</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>);</B>
+
+<DD>
+<P>
+Frees the table specified by the
+<I>tblid</I>
+
+parameter, inside the database pointed by
+<I>dfctx</I>.
+
+All the allocation related to the specified table will be released.
+The function returns 0 in case of success, and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_sync</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+
+<DD>
+<P>
+Syncs the database buffer cache onto the storage media.
+The
+<I>dfctx</I>
+
+represent the database to be sync.
+If transactions are used, the
+<I>smdb_dbf_sync</I>()
+
+function simply causes the dirty buffer cache blocks to be written onto the log.
+The function returns 0 in case of success, and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_begin</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+
+<DD>
+<P>
+Starts a transation for the database pointed by the
+<I>dfctx</I>
+
+parameter.
+Transactions must not be nested, and must be always terminated by either a call to
+<I>smdb_dbf_end</I>()
+
+or
+<I>smdb_dbf_rollback</I>().
+
+The function returns 0 in case of success, and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_end</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+
+<DD>
+<P>
+Ends a transaction previously opened by a call to the
+<I>smdb_dbf_begin</I>()
+
+function.
+After a successful return from
+<I>smdb_dbf_end</I>(),
+
+the database operations performed inside the transaction are permanently visible
+inside the database pointed by
+<I>dfctx</I>.
+
+The function returns 0 in case of success, and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_rollback</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>);</B>
+
+<DD>
+<P>
+Rollbacks the operations done after a previous call to
+<I>smdb_dbf_begin</I>()
+
+for the database pointed by
+<I>dfctx</I>.
+
+The function returns 0 in case of success, and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_get</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, struct smdb_db_ckey const *</B><I>key</I><B>, struct smdb_db_record *</B><I>rec</I><B>,struct smdb_db_kenum *</B><I>ken</I><B>);</B>
+
+<DD>
+<P>
+Looks up, inside the database pointed by
+<I>dfctx</I>
+
+and table
+<I>tblid</I>,
+
+the key specified by
+<I>key</I>.
+
+The
+<I>smdb_dbf_get</I>()
+
+function returns (if any found) the first record matching the passed
+<I>key</I>
+
+parameter.
+The caller can continue the enumeration of the records matching the given
+<I>key</I>
+
+using the
+<I>smdb_dbf_get_next</I>()
+
+function.
+The record is stored into the structure pointed by the
+<I>rec</I>
+
+parameter, while the enumeration context is stored inside the
+<I>ken</I>
+
+parameter (which should be considered a opaque structure by the caller).
+The caller must use the
+<I>smdb_dbf_free_record</I>()
+
+function to free the resources allocated in the
+<I>rec</I>
+
+structure, if a positive lookup happen.
+The function returns a number greater than 0 in case of positive lookup, 0 in case of missing lookup,
+and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_get_next</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, struct smdb_db_ckey const *</B><I>key</I><B>, struct smdb_db_record *</B><I>rec</I><B>, struct smdb_db_kenum *</B><I>ken</I><B>);</B>
+
+<DD>
+<P>
+Continue the enumeration initiated with the function
+<I>smdb_dbf_get</I>(),
+
+matching, inside the
+<I>dfctx</I>
+
+database, the next record with
+<I>key</I>
+
+value.
+The caller must use the
+<I>smdb_dbf_free_record</I>()
+
+function to free the resources allocated in the
+<I>rec</I>
+
+structure, if a positive lookup happen.
+The function returns a number greater than 0 in case of positive lookup, 0 in case of missing lookup,
+and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_first</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, struct smdb_db_record *</B><I>rec</I><B>, struct smdb_db_kenum *</B><I>ken</I><B>);</B>
+
+<DD>
+<P>
+Starts an enumeration of all records inside the
+<I>dfctx</I>,
+
+table
+<I>tblid</I>.
+
+The record data is stored in the supplied
+<I>rec</I>
+
+parameter, while the
+<I>ken</I>
+
+parameter is used to store the
+<B>SMDB</B>
+
+private enumeration context.
+The function returns a number greater than 0 in case of positive lookup, 0 in case of missing lookup,
+and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_next</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, struct smdb_db_record *</B><I>rec</I><B>, struct smdb_db_kenum *</B><I>ken</I><B>);</B>
+
+<DD>
+<P>
+Continues the enumeration of all records inside the
+<I>dfctx</I>,
+
+table
+<I>tblid</I>,
+
+initiated with a call to
+<I>smdb_dbf_first</I>().
+
+The record data is stored in the supplied
+<I>rec</I>
+
+parameter, while the
+<I>ken</I>
+
+parameter is used to store the
+<B>SMDB</B>
+
+private enumeration context.
+The function returns a number greater than 0 in case of positive lookup, 0 in case of missing lookup,
+and -1 in case of error.
+<P>
+<DT><B>void </B><I>smdb_dbf_free_record</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, struct smdb_db_record *</B><I>rec</I><B>);</B>
+
+<DD>
+<P>
+Frees the resources allocated for the
+<I>rec</I>
+
+record, inside the
+<I>dfctx</I>
+
+database.
+Failure to call
+<I>smdb_dbf_free_record</I>()
+
+after a successful lookup from
+<I>smdb_dbf_get</I>(),<I>smdb_dbf_get_next</I>(),<I>smdb_dbf_first</I>(), or <I>smdb_dbf_free_record</I>(),
+
+will cause resource leakage inside the system.
+<P>
+<DT><B>int </B><I>smdb_dbf_put</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, struct smdb_db_ckey const *</B><I>key</I><B>, struct smdb_db_cdata *</B><I>data</I><B>);</B>
+
+<DD>
+<P>
+Stores the record specified by the
+<I>key</I>
+
+and
+<I>data</I>
+
+pair, inside the database
+<I>dfctx</I>,
+
+table
+<I>tblid</I>.
+
+The function returns 0 in case of success, and -1 in case of error.
+<P>
+<DT><B>int </B><I>smdb_dbf_erase</I><B>(struct smdb_dbfile_ctx *</B><I>dfctx</I><B>, unsigned int</B><I>tblid</I><B>, struct smdb_db_ckey const *</B><I>key</I><B>, struct smdb_db_cdata const *</B><I>data</I><B>);</B>
+
+<DD>
+<P>
+Removes a record from inside the
+<I>dfctx</I>,
+
+table
+<I>tblid</I>.
+
+The
+<I>key</I>
+
+parameter specifies the key used to lookup and delete the record.
+If
+<I>data</I>
+
+is
+<B>NULL</B>,
+
+the first matching
+<I>key</I>
+
+is removed from the database.
+Otherwise,
+<I>data</I>
+
+is used for extra record matching before deletion.
+The function returns a number greater than 0 in case of positive elimination, 0 in case of missing lookup,
+and -1 in case of error.
+<P>
+<P>
+</DL>
+<A NAME="lbAG">&nbsp;</A>
+<H2>Example Interface Implementation</H2>
+
+Here is reported an example implementation for the external interfaces
+required by the
+<B>SMDB</B>
+
+functionality:
+<P>
+<PRE>
+#include &lt;<A HREF="file:///usr/include/stdio.h">stdio.h</A>&gt;
+#include &lt;<A HREF="file:///usr/include/stdlib.h">stdlib.h</A>&gt;
+#include &lt;<A HREF="file:///usr/include/unistd.h">unistd.h</A>&gt;
+#include &lt;<A HREF="file:///usr/include/string.h">string.h</A>&gt;
+#include &lt;<A HREF="file:///usr/include/sys/types.h">sys/types.h</A>&gt;
+#include &lt;<A HREF="file:///usr/include/sys/stat.h">sys/stat.h</A>&gt;
+#include &lt;<A HREF="file:///usr/include/fcntl.h">fcntl.h</A>&gt;
+#include &quot;smdb-incl.h&quot;
+#include &quot;smdb-xif-posix.h&quot;
+
+#ifdef _WIN32
+#include &lt;<A HREF="file:///usr/include/windows.h">windows.h</A>&gt;
+#include &lt;<A HREF="file:///usr/include/io.h">io.h</A>&gt;
+
+#define O_RDONLY _O_RDONLY
+#define O_CREAT _O_CREAT
+#define O_RDWR _O_RDWR
+#define O_TRUNC _O_TRUNC
+
+#define open(f, m, p) _open(f, (m) | _O_BINARY)
+#define read(f, d, n) _read(f, d, n)
+#define write(f, d, n) _write(f, d, n)
+#define lseek(f, o, w) _lseek(f, o, w)
+#define fsync(f) _commit(f)
+#define mkdir(n, p) <A HREF="/cgi-bin/man/man2html?n+_mkdir">_mkdir</A>(n)
+#define <A HREF="/cgi-bin/man/man2html?n+rmdir">rmdir</A>(n) <A HREF="/cgi-bin/man/man2html?n+_rmdir">_rmdir</A>(n)
+
+#endif
+
+
+struct smdbxi_mem_px {
+        struct smdbxi_mem ifc;
+        long usecnt;
+};
+
+struct smdbxi_file_px {
+        struct smdbxi_file ifc;
+        long usecnt;
+        int fd;
+        int closefd;
+        char *filename;
+        int unlinkfile;
+};
+
+struct smdbxi_fs_px {
+        struct smdbxi_fs ifc;
+        long usecnt;
+};
+
+struct smdbxi_factory_px {
+        struct smdbxi_factory ifc;
+        long usecnt;
+        long seqf;
+};
+
+
+#if defined(WIN32)
+
+static int ftruncate(int fd, smdb_offset_t size)
+{
+        HANDLE hfile;
+        LARGE_INTEGER cpos, lsize;
+
+        hfile = (HANDLE) _get_osfhandle(fd);
+        lsize.QuadPart = 0;
+        if (!SetFilePointerEx(hfile, lsize, &amp;cpos, FILE_CURRENT))
+                return -1;
+        lsize.QuadPart = size;
+        if (!SetFilePointerEx(hfile, lsize, &amp;cpos, FILE_BEGIN))
+                return -1;
+        if (!SetEndOfFile(hfile)) {
+                lsize = cpos;
+                SetFilePointerEx(hfile, lsize, &amp;cpos, FILE_BEGIN);
+                return -1;
+        }
+        if (cpos.QuadPart &gt; size)
+                cpos.QuadPart = size;
+        SetFilePointerEx(hfile, cpos, NULL, FILE_BEGIN);
+
+        return 0;
+}
+
+#endif
+
+static int smdb_xif_mem__get(void *priv)
+{
+        struct smdbxi_mem_px *pif = (struct smdbxi_mem_px *) priv;
+
+        pif-&gt;usecnt++;
+
+        return 0;
+}
+
+static int smdb_xif_mem__release(void *priv)
+{
+        struct smdbxi_mem_px *pif = (struct smdbxi_mem_px *) priv;
+
+        if (!--pif-&gt;usecnt) {
+
+                free(pif);
+        }
+
+        return 0;
+}
+
+static void *smdb_xif_mem__alloc(void *priv, int size)
+{
+        return malloc(size);
+}
+
+static void smdb_xif_mem__free(void *priv, void *data)
+{
+        free(data);
+}
+
+static struct smdbxi_mem *smdb_xif_mem(void)
+{
+        struct smdbxi_mem_px *pif;
+
+        if ((pif = (struct smdbxi_mem_px *)
+             malloc(sizeof(struct smdbxi_mem_px))) == NULL)
+                return NULL;
+        pif-&gt;ifc.priv = pif;
+        pif-&gt;ifc.get = smdb_xif_mem__get;
+        pif-&gt;ifc.release = smdb_xif_mem__release;
+        pif-&gt;ifc.alloc = smdb_xif_mem__alloc;
+        pif-&gt;ifc.free = smdb_xif_mem__free;
+        pif-&gt;usecnt = 1;
+
+        return &amp;pif-&gt;ifc;
+}
+
+static int smdb_xif_file__get(void *priv)
+{
+        struct smdbxi_file_px *pif = (struct smdbxi_file_px *) priv;
+
+        pif-&gt;usecnt++;
+
+        return 0;
+}
+
+static int smdb_xif_file__release(void *priv)
+{
+        struct smdbxi_file_px *pif = (struct smdbxi_file_px *) priv;
+
+        if (!--pif-&gt;usecnt) {
+                if (pif-&gt;closefd)
+                        close(pif-&gt;fd);
+                if (pif-&gt;filename != NULL) {
+                        if (pif-&gt;unlinkfile)
+                                remove(pif-&gt;filename);
+                        free(pif-&gt;filename);
+                }
+                free(pif);
+        }
+
+        return 0;
+}
+
+static smdb_offset_t smdb_xif_file__seek(void *priv, smdb_offset_t off, int whence)
+{
+        struct smdbxi_file_px *pif = (struct smdbxi_file_px *) priv;
+
+        return lseek(pif-&gt;fd, (off_t) off, whence);
+}
+
+static int smdb_xif_file__read(void *priv, void *buf, int n)
+{
+        struct smdbxi_file_px *pif = (struct smdbxi_file_px *) priv;
+
+        return read(pif-&gt;fd, buf, n);
+}
+
+static int smdb_xif_file__write(void *priv, void const *buf, int n)
+{
+        struct smdbxi_file_px *pif = (struct smdbxi_file_px *) priv;
+
+        return write(pif-&gt;fd, buf, n);
+}
+
+static int smdb_xif_file__truncate(void *priv, smdb_offset_t size)
+{
+        struct smdbxi_file_px *pif = (struct smdbxi_file_px *) priv;
+
+        return ftruncate(pif-&gt;fd, (off_t) size);
+}
+
+static int smdb_xif_file__sync(void *priv)
+{
+        struct smdbxi_file_px *pif = (struct smdbxi_file_px *) priv;
+
+        return fsync(pif-&gt;fd);
+}
+
+static char const *smdb_xif_file__path(void *priv)
+{
+        struct smdbxi_file_px *pif = (struct smdbxi_file_px *) priv;
+
+        return pif-&gt;filename;
+}
+
+struct smdbxi_file *smdb_xif_file(int fd, int closefd, char const *filename,
+                                  int flags, int unlinkfile)
+{
+        int lfd = -1;
+        struct smdbxi_file_px *pif;
+
+        if (fd &lt; 0) {
+                if (filename == NULL)
+                        return NULL;
+                switch (flags)
+                {
+                case SMDBXI_FL_ROPEN:
+                        flags = O_RDONLY;
+                        break;
+                case SMDBXI_FL_RWOPEN:
+                        flags = O_RDWR;
+                        break;
+                case SMDBXI_FL_CREATE:
+                        flags = O_RDWR | O_CREAT;
+                        break;
+                case SMDBXI_FL_CREATENEW:
+                        flags = O_RDWR | O_CREAT | O_TRUNC;
+                        break;
+                default:
+                        return NULL;
+                }
+                if ((fd = lfd = open(filename, flags, 0644)) == -1)
+                        return NULL;
+                closefd = 1;
+        }
+        if ((pif = (struct smdbxi_file_px *)
+             malloc(sizeof(struct smdbxi_file_px))) == NULL) {
+                if (lfd != -1) {
+                        close(lfd);
+                        if (unlinkfile)
+                                remove(filename);
+                }
+                return NULL;
+        }
+        pif-&gt;ifc.priv = pif;
+        pif-&gt;ifc.get = smdb_xif_file__get;
+        pif-&gt;ifc.release = smdb_xif_file__release;
+        pif-&gt;ifc.seek = smdb_xif_file__seek;
+        pif-&gt;ifc.read = smdb_xif_file__read;
+        pif-&gt;ifc.write = smdb_xif_file__write;
+        pif-&gt;ifc.truncate = smdb_xif_file__truncate;
+        pif-&gt;ifc.sync = smdb_xif_file__sync;
+        pif-&gt;ifc.path = smdb_xif_file__path;
+        pif-&gt;usecnt = 1;
+        pif-&gt;fd = fd;
+        pif-&gt;closefd = closefd;
+        pif-&gt;filename = filename != NULL ? strdup(filename): NULL;
+        pif-&gt;unlinkfile = unlinkfile;
+
+        return &amp;pif-&gt;ifc;
+}
+
+static int smdb_xif_fs__get(void *priv)
+{
+        struct smdbxi_fs_px *pif = (struct smdbxi_fs_px *) priv;
+
+        pif-&gt;usecnt++;
+
+        return 0;
+}
+
+static int smdb_xif_fs__release(void *priv)
+{
+        struct smdbxi_fs_px *pif = (struct smdbxi_fs_px *) priv;
+
+        if (!--pif-&gt;usecnt) {
+
+                free(pif);
+        }
+
+        return 0;
+}
+
+static struct smdbxi_file *smdb_xif_fs__open(void *priv, char const *path,
+                                             int flags)
+{
+        return smdb_xif_file(-1, 0, path, flags, 0);
+}
+
+static int smdb_xif_fs__remove(void *priv, char const *path)
+{
+        return remove(path);
+}
+
+static int smdb_xif_fs__rename(void *priv, char const *opath, char const *npath)
+{
+        return rename(opath, npath);
+}
+
+static int smdb_xif_fs__mkdir(void *priv, char const *path)
+{
+        return mkdir(path, 0775);
+}
+
+static int smdb_xif_fs__rmdir(void *priv, char const *path)
+{
+        return rmdir(path);
+}
+
+static struct smdbxi_fs *smdb_xif_fs(void)
+{
+        struct smdbxi_fs_px *pif;
+
+        if ((pif = (struct smdbxi_fs_px *)
+             malloc(sizeof(struct smdbxi_fs_px))) == NULL)
+                return NULL;
+        pif-&gt;ifc.priv = pif;
+        pif-&gt;ifc.get = smdb_xif_fs__get;
+        pif-&gt;ifc.release = smdb_xif_fs__release;
+        pif-&gt;ifc.open = smdb_xif_fs__open;
+        pif-&gt;ifc.remove = smdb_xif_fs__remove;
+        pif-&gt;ifc.rename = smdb_xif_fs__rename;
+        pif-&gt;ifc.mkdir = smdb_xif_fs__mkdir;
+        pif-&gt;ifc.rmdir = smdb_xif_fs__rmdir;
+        pif-&gt;usecnt = 1;
+
+        return &amp;pif-&gt;ifc;
+}
+
+static int smdb_xif_factory__get(void *priv)
+{
+        struct smdbxi_factory_px *pif = (struct smdbxi_factory_px *) priv;
+
+        pif-&gt;usecnt++;
+
+        return 0;
+}
+
+static int smdb_xif_factory__release(void *priv)
+{
+        struct smdbxi_factory_px *pif = (struct smdbxi_factory_px *) priv;
+
+        if (!--pif-&gt;usecnt) {
+
+                free(pif);
+        }
+
+        return 0;
+}
+
+static struct smdbxi_mem *smdb_xif_factory__mem(void *priv)
+{
+        return smdb_xif_mem();
+}
+
+static struct smdbxi_fs *smdb_xif_factory__fs(void *priv)
+{
+        return smdb_xif_fs();
+}
+
+static struct smdbxi_file *smdb_xif_factory__file(void *priv)
+{
+        struct smdbxi_factory_px *pif = (struct smdbxi_factory_px *) priv;
+        char filename[256];
+
+        sprintf(filename, &quot;%p-%ld.tmp&quot;, priv, pif-&gt;seqf++);
+
+        return smdb_xif_file(-1, 1, filename, O_CREAT | O_RDWR | O_TRUNC, 1);
+}
+
+struct smdbxi_factory *smdb_xif_factory(void)
+{
+        struct smdbxi_factory_px *pif;
+
+        if ((pif = (struct smdbxi_factory_px *)
+             malloc(sizeof(struct smdbxi_factory_px))) == NULL)
+                return NULL;
+        pif-&gt;ifc.priv = pif;
+        pif-&gt;ifc.get = smdb_xif_factory__get;
+        pif-&gt;ifc.release = smdb_xif_factory__release;
+        pif-&gt;ifc.mem = smdb_xif_factory__mem;
+        pif-&gt;ifc.file = smdb_xif_factory__file;
+        pif-&gt;ifc.fs = smdb_xif_factory__fs;
+        pif-&gt;usecnt = 1;
+        pif-&gt;seqf = 0;
+
+        return &amp;pif-&gt;ifc;
+}
+
+</PRE>
+
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLE CODE</H2>
+
+The following code (also included inside the
+<B>SMDB</B>
+
+distribution package) briefly shows how to use the
+<B>SMDB</B>
+
+library:
+<P>
+<PRE>
+#include &lt;<A HREF="file:///usr/include/stdio.h">stdio.h</A>&gt;
+#include &lt;<A HREF="file:///usr/include/stdlib.h">stdlib.h</A>&gt;
+#include &lt;<A HREF="file:///usr/include/string.h">string.h</A>&gt;
+#include &quot;smdb-incl.h&quot;
+#include &quot;smdb-xif-posix.h&quot;
+
+#define MODE_PUT 1
+#define MODE_GET 2
+#define MODE_ERASE 3
+#define MODE_CMP 4
+#define MODE_DUMP 5
+#define MODE_RMTABLE 6
+#define MODE_MKTABLE 7
+
+static void *load_file(char const *path, long *pfsize)
+{
+        long fsize;
+        void *fdata;
+        FILE *file;
+
+        if ((file = fopen(path, &quot;rb&quot;)) == NULL) {
+                perror(path);
+                return NULL;
+        }
+        fseek(file, 0, SEEK_END);
+        fsize = ftell(file);
+        rewind(file);
+        if ((fdata = malloc(fsize + 1)) == NULL) {
+                perror(&quot;allocating file data&quot;);
+                fclose(file);
+                return NULL;
+        }
+        if (fread(fdata, 1, (size_t) fsize, file) != (size_t) fsize) {
+                perror(path);
+                free(fdata);
+                fclose(file);
+                return NULL;
+        }
+        fclose(file);
+        ((char *) fdata)[fsize] = 0;
+        *pfsize = fsize;
+
+        return fdata;
+}
+
+static char **get_flist(char **ifiles, int infiles, char const *flpath,
+                        int *pnfiles)
+{
+        int i, nalloc;
+        long fsize;
+        char *fdata, *tok;
+        char **flist, **nflist;
+
+        if (flpath == NULL) {
+                nalloc = infiles + 1;
+                if ((flist = (char **) malloc(nalloc * sizeof(char *))) == NULL)
+                        return NULL;
+                for (i = 0; i &lt; infiles; i++)
+                        flist[i] = strdup(ifiles[i]);
+                *pnfiles = infiles;
+                return flist;
+        }
+        if ((fdata = (char *) load_file(flpath, &amp;fsize)) == NULL) {
+                perror(flpath);
+                return NULL;
+        }
+        nalloc = infiles + (int) (fsize / 16) + 1;
+        if ((flist = (char **) malloc(nalloc * sizeof(char *))) == NULL) {
+                free(fdata);
+                return NULL;
+        }
+        for (i = 0; i &lt; infiles; i++)
+                flist[i] = strdup(ifiles[i]);
+        for (tok = strtok(fdata, &quot;); tok != NULL;
+             tok = strtok(NULL, &quot;)) {
+                if (i &gt;= nalloc) {
+                        nalloc = nalloc * 2 + 32;
+                        if ((nflist = (char **)
+                             realloc(flist, nalloc * sizeof(char *))) == NULL) {
+                                for (i--; i &gt;= 0; i--)
+                                        free(flist[i]);
+                                free(flist);
+                                free(fdata);
+                                return NULL;
+                        }
+                }
+                flist[i++] = strdup(tok);
+        }
+        free(fdata);
+        *pnfiles = i;
+
+        return flist;
+}
+
+static void free_flist(char **flist, int n)
+{
+        if (flist != NULL) {
+                for (; n &gt; 0; n--)
+                        free(flist[n - 1]);
+        }
+        free(flist);
+}
+
+int main(int ac, char **av)
+{
+        int i, error, nfiles, mode = MODE_PUT, journal = 0;
+        unsigned int tblsize = 16000, tblid = 0;
+        long fsize, rcount;
+        void *fdata;
+        char **files;
+        char const *path = NULL, *flpath = NULL;
+        struct smdbxi_factory *fac;
+        struct smdbxi_file *file;
+        struct smdb_dbfile_ctx *dfctx;
+        struct smdb_db_config dbcfg;
+        struct smdb_db_ckey ckey;
+        struct smdb_db_cdata cdata;
+        struct smdb_db_record rec;
+        struct smdb_db_kenum ken;
+
+        MZERO(dbcfg);
+        dbcfg.blk_size = 1024;
+        dbcfg.blk_count = 100 * 1024;
+        dbcfg.cache_size = 64 * 1024;
+        dbcfg.num_tables = 16;
+        for (i = 1; i &lt; ac; i++) {
+                if (strcmp(av[i], &quot;-f&quot;) == 0) {
+                        if (++i &lt; ac)
+                                path = av[i];
+                } else if (strcmp(av[i], &quot;-l&quot;) == 0) {
+                        if (++i &lt; ac)
+                                flpath = av[i];
+                } else if (strcmp(av[i], &quot;-b&quot;) == 0) {
+                        if (++i &lt; ac)
+                                dbcfg.blk_size = strtoul(av[i], NULL, 0);
+                } else if (strcmp(av[i], &quot;-c&quot;) == 0) {
+                        if (++i &lt; ac)
+                                dbcfg.blk_count = strtoul(av[i], NULL, 0);
+                } else if (strcmp(av[i], &quot;-s&quot;) == 0) {
+                        if (++i &lt; ac)
+                                dbcfg.cache_size = strtoul(av[i], NULL, 0);
+                } else if (strcmp(av[i], &quot;-x&quot;) == 0) {
+                        if (++i &lt; ac)
+                                tblsize = strtoul(av[i], NULL, 0);
+                } else if (strcmp(av[i], &quot;-T&quot;) == 0) {
+                        if (++i &lt; ac)
+                                tblid = strtoul(av[i], NULL, 0);
+                } else if (strcmp(av[i], &quot;-g&quot;) == 0)
+                        mode = MODE_GET;
+                else if (strcmp(av[i], &quot;-e&quot;) == 0)
+                        mode = MODE_ERASE;
+                else if (strcmp(av[i], &quot;-m&quot;) == 0)
+                        mode = MODE_CMP;
+                else if (strcmp(av[i], &quot;-d&quot;) == 0)
+                        mode = MODE_DUMP;
+                else if (strcmp(av[i], &quot;-R&quot;) == 0)
+                        mode = MODE_RMTABLE;
+                else if (strcmp(av[i], &quot;-M&quot;) == 0)
+                        mode = MODE_MKTABLE;
+                else if (strcmp(av[i], &quot;-j&quot;) == 0)
+                        journal = 1;
+                else
+                        break;
+        }
+        if (path == NULL)
+                return 1;
+
+        if ((fac = smdb_xif_factory()) == NULL)
+                return 2;
+        if ((file = smdb_xif_file(-1, 0, path, SMDBXI_FL_RWOPEN, 0)) == NULL) {
+                if ((file = smdb_xif_file(-1, 0, path, SMDBXI_FL_CREATENEW,
+                                          0)) == NULL)
+                        return 3;
+                if (smdb_dbf_create(fac, file, &amp;dbcfg, &amp;dfctx) &lt; 0)
+                        return 4;
+                if (smdb_dbf_create_table(dfctx, tblid, tblsize) &lt; 0)
+                        return 5;
+        } else {
+                if (smdb_dbf_open(fac, file, &amp;dbcfg, &amp;dfctx) &lt; 0)
+                        return 4;
+        }
+
+        if ((files = get_flist(&amp;av[i], ac - i, flpath, &amp;nfiles)) == NULL)
+                return 6;
+
+        fprintf(stdout, &quot;Number of files: %d, nfiles);
+
+        if (journal &amp;&amp; smdb_dbf_begin(dfctx) &lt; 0)
+                return 7;
+
+        if (mode == MODE_GET) {
+                for (i = 0; i &lt; nfiles; i++) {
+                        ckey.data = files[i];
+                        ckey.size = strlen(files[i]);
+                        if (smdb_dbf_get(dfctx, tblid, &amp;ckey, &amp;rec, &amp;ken) &gt; 0) {
+
+                                smdb_dbf_free_record(dfctx, &amp;rec);
+                        } else {
+                                fprintf(stderr, &quot;Record not found: '%s', files[i]);
+                        }
+                }
+        } else if (mode == MODE_ERASE) {
+                for (i = 0; i &lt; nfiles; i++) {
+                        ckey.data = files[i];
+                        ckey.size = strlen(files[i]);
+                        if (smdb_dbf_erase(dfctx, tblid, &amp;ckey, NULL) &gt; 0) {
+
+                        } else {
+                                fprintf(stderr, &quot;Record not found: '%s', files[i]);
+                        }
+                }
+        } else if (mode == MODE_PUT) {
+                for (i = 0; i &lt; nfiles; i++) {
+                        if ((fdata = load_file(files[i], &amp;fsize)) == NULL) {
+                                free_flist(files, nfiles);
+                                return 8;
+                        }
+
+                        ckey.data = files[i];
+                        ckey.size = strlen(files[i]);
+                        cdata.data = fdata;
+                        cdata.size = fsize;
+                        if (smdb_dbf_put(dfctx, tblid, &amp;ckey, &amp;cdata) &lt; 0) {
+                                fprintf(stderr, &quot;DD insert failed: '%s', files[i]);
+                                free_flist(files, nfiles);
+                                return 9;
+                        }
+                        free(fdata);
+                }
+        } else if (mode == MODE_CMP) {
+                for (i = 0; i &lt; nfiles; i++) {
+                        if ((fdata = load_file(files[i], &amp;fsize)) == NULL) {
+                                free_flist(files, nfiles);
+                                return 8;
+                        }
+
+                        ckey.data = files[i];
+                        ckey.size = strlen(files[i]);
+                        if (smdb_dbf_get(dfctx, tblid, &amp;ckey, &amp;rec, &amp;ken) &gt; 0) {
+                                if (rec.data.size != (unsigned long) fsize ||
+                                    memcmp(rec.data.data, fdata, fsize) != 0)
+                                        fprintf(stderr, &quot;Record in DB differs: '%s',
+                                                files[i]);
+
+                                smdb_dbf_free_record(dfctx, &amp;rec);
+                        } else {
+                                fprintf(stderr, &quot;Record not found: '%s', files[i]);
+                        }
+                        free(fdata);
+                }
+        } else if (mode == MODE_DUMP) {
+                rcount = 0;
+                if ((error = smdb_dbf_first(dfctx, tblid, &amp;rec, &amp;ken)) &gt; 0) {
+                        do {
+                                fprintf(stdout, &quot;KEY (%ld)='&quot;, rec.key.size);
+                                fwrite(rec.key.data, 1, rec.key.size, stdout);
+                                fprintf(stdout, &quot;');
+
+                                fprintf(stdout, &quot;	DATA (%ld)n&quot;, rec.data.size);
+
+                                smdb_dbf_free_record(dfctx, &amp;rec);
+                                rcount++;
+                        } while ((error = smdb_dbf_next(dfctx, &amp;rec, &amp;ken)) &gt; 0);
+                }
+                if (error &lt; 0) {
+                        fprintf(stderr, &quot;Record enumeration failed!);
+                        free_flist(files, nfiles);
+                        return 9;
+                }
+                fprintf(stdout, &quot;ound %ld records., rcount);
+        } else if (mode == MODE_RMTABLE) {
+                if (smdb_dbf_free_table(dfctx, tblid) &lt; 0) {
+                        fprintf(stderr, &quot;Table remove failed!);
+                        return 11;
+                }
+        } else if (mode == MODE_MKTABLE) {
+                if (smdb_dbf_create_table(dfctx, tblid, tblsize) &lt; 0) {
+                        fprintf(stderr, &quot;Table create failed!);
+                        return 11;
+                }
+        }
+
+        free_flist(files, nfiles);
+        if (journal &amp;&amp; smdb_dbf_end(dfctx) &lt; 0)
+                return 12;
+
+        smdb_dbf_free(dfctx);
+        SMDBXI_RELEASE(file);
+        SMDBXI_RELEASE(fac);
+
+        return 0;
+}
+
+</PRE>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>LICENSE</H2>
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+A copy of the license is available at :
+<P>
+<B><A HREF="http://www.gnu.org/copyleft/lesser.html">http://www.gnu.org/copyleft/lesser.html</A></B>
+
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>AUTHOR</H2>
+
+Developed by Davide Libenzi &lt;
+<B><A HREF="mailto:davidel@xmailserver.org">davidel@xmailserver.org</A></B> &gt;.
+
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>AVAILABILITY</H2>
+
+The latest version of
+<B>SMDB</B>
+
+can be found at :
+<P>
+<B><A HREF="http://www.xmailserver.org/smdb-lib.html">http://www.xmailserver.org/smdb-lib.html</A></B>
+
+<P>
+<A NAME="lbAL">&nbsp;</A>
+<H2>BUGS</H2>
+
+There are no known bugs. Bug reports and comments to Davide Libenzi &lt;
+<B><A HREF="mailto:davidel@xmailserver.org">davidel@xmailserver.org</A></B> &gt;.
+
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DL>
+<DT><A HREF="#lbAE">Structures And Macros</A><DD>
+<DT><A HREF="#lbAF">Functions</A><DD>
+</DL>
+<DT><A HREF="#lbAG">Example Interface Implementation</A><DD>
+<DT><A HREF="#lbAH">EXAMPLE CODE</A><DD>
+<DT><A HREF="#lbAI">LICENSE</A><DD>
+<DT><A HREF="#lbAJ">AUTHOR</A><DD>
+<DT><A HREF="#lbAK">AVAILABILITY</A><DD>
+<DT><A HREF="#lbAL">BUGS</A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="/cgi-bin/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 02:45:49 GMT, June 11, 2010
+</BODY>
+</HTML>
