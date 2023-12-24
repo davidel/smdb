@@ -1,0 +1,2 @@
+# smdb
+GDBM like library
